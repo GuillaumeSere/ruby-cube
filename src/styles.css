@@ -6,6 +6,7 @@ body { font-family: system-ui, Arial; background: #111; color: #eee; }
 .site-header .container { max-width:1100px; margin:0 auto; display:flex; flex-direction:column; gap:6px; }
 .site-header .title { margin:0; font-size:20px; color:#fff; }
 .site-header .tagline { margin:0; font-size:13px; color:#cbd5e1; }
+.header-icon { border-radius:6px; box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
 #main-content { display:flex; flex-direction:column; flex:1; }
 .controls { padding:10px; background: #0f0f0f; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
 .canvas-wrap { flex:1; position:relative; }
