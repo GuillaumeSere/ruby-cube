@@ -1,0 +1,17 @@
+Stop logging by changing setting "lgd.options.createDebugLog"
+If you have any problems or requests please create an issue on Github.
+
+c:\Users\DELL\Desktop\ruby-cube\src\components\RubiksCube.js: 
+
+ERROR: Error occurred parsing value using "any" instead. err: SyntaxError: Unexpected end of input
+ERROR: Error occurred parsing value using "any" instead. err: SyntaxError: Unexpected end of input
+ERROR: Error occurred parsing value using "any" instead. err: SyntaxError: Unexpected end of input
+ERROR: Error occurred parsing value using "any" instead. err: SyntaxError: Unexpected end of input
+ERROR: Error occurred parsing value using "any" instead. err: SyntaxError: Unexpected end of input
+ERROR: Error occurred parsing value using "any" instead. err: SyntaxError: Unexpected end of input
+ERROR: Error occurred parsing value using "any" instead. err: SyntaxError: Unexpected end of input
+ERROR: Error occurred parsing value using "any" instead. err: SyntaxError: Unexpected end of input
+ERROR: Error occurred parsing value using "any" instead. err: SyntaxError: Unexpected end of input
+ERROR: Error occurred parsing value using "any" instead. err: SyntaxError: Unexpected end of input
+ERROR: Error occurred parsing value using "any" instead. err: SyntaxError: Unexpected token '}'
+ERROR: Error occurred parsing value using "any" instead. err: SyntaxError: Unexpected token '}'

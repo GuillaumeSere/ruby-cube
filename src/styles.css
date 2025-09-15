@@ -1,0 +1,8 @@
+* { box-sizing: border-box; }
+html,body,#app { height: 100%; margin:0; padding:0; }
+body { font-family: system-ui, Arial; background: #111; color: #eee; }
+#app { display:flex; flex-direction:column; height:100vh; }
+.controls { padding:10px; background: #0f0f0f; display:flex; gap:8px; align-items:center; }
+.canvas-wrap { flex:1; position:relative; }
+canvas { display:block; width:100%; height:100%; }
+.btn { background:#1f6feb; color:white; padding:6px 10px; border-radius:6px; cursor:pointer; border:none }
