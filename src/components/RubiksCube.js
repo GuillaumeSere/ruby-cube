@@ -47,7 +47,7 @@ export function initRubiksApp(container) {
 
   // face controls
   const faces = ['U','D','F','B','L','R'];
-  const faceMap = { U: 'Up', D: 'Down', F: 'Front', B: 'Back', L: 'Left', R: 'Right' };
+  const faceMap = { U: 'Haut', D: 'Bas', F: 'Devant', B: 'Dos', L: 'Gauche', R: 'Droite' };
   const faceControls = document.createElement('div');
   faceControls.className = 'face-controls';
   faces.forEach(f => {
