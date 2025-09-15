@@ -36,14 +36,31 @@ export function initRubiksApp(container) {
   // layout
   const controlsBar = document.createElement('div');
   controlsBar.className = 'controls';
-  const scrambleBtn = document.createElement('button');
-  scrambleBtn.className = 'btn';
-  scrambleBtn.textContent = 'Scramble';
   const resetBtn = document.createElement('button');
   resetBtn.className = 'btn';
   resetBtn.textContent = 'Reset';
-  controlsBar.appendChild(scrambleBtn);
+  // scramble button removed (use Démarrer to scramble)
   controlsBar.appendChild(resetBtn);
+  const startBtn = document.createElement('button');
+  startBtn.className = 'btn';
+  startBtn.textContent = 'Démarrer';
+  const movesLabel = document.createElement('div');
+  movesLabel.style.color = '#ddd';
+  movesLabel.style.marginLeft = '8px';
+  movesLabel.innerHTML = 'Mouvements: <span id="move-count">0</span>';
+  const timerLabel = document.createElement('div');
+  timerLabel.style.color = '#ddd';
+  timerLabel.style.marginLeft = '12px';
+  timerLabel.innerHTML = 'Temps: <span id="time-count">00:00</span>';
+  const statusLabel = document.createElement('div');
+  statusLabel.style.color = '#7ee787';
+  statusLabel.style.marginLeft = '12px';
+  statusLabel.id = 'game-status';
+  statusLabel.textContent = '';
+  controlsBar.appendChild(startBtn);
+  controlsBar.appendChild(movesLabel);
+  controlsBar.appendChild(timerLabel);
+  controlsBar.appendChild(statusLabel);
 
   // face controls
   const faces = ['U','D','F','B','L','R'];
@@ -68,9 +85,15 @@ export function initRubiksApp(container) {
   btnRow.appendChild(btnCCW);
   wrap.appendChild(label);
   wrap.appendChild(btnRow);
-  faceControls.appendChild(wrap);
-    btnCW.addEventListener('click', () => rotateFace(f, 1));
-    btnCCW.addEventListener('click', () => rotateFace(f, -1));
+    faceControls.appendChild(wrap);
+    btnCW.addEventListener('click', async () => {
+      if (!gameStarted) return;
+      await rotateFace(f, 1, { user: true });
+    });
+    btnCCW.addEventListener('click', async () => {
+      if (!gameStarted) return;
+      await rotateFace(f, -1, { user: true });
+    });
   });
   controlsBar.appendChild(faceControls);
 
@@ -145,10 +168,57 @@ export function initRubiksApp(container) {
   window.addEventListener('resize', onResize);
 
   let isRotating = false;
+  let gameStarted = false;
+  let moveCount = 0;
 
-  function rotateFace(face, dir = 1) {
-    if (isRotating) return;
+  function updateMoveUI() {
+    const el = document.getElementById('move-count');
+    if (el) el.textContent = String(moveCount);
+  }
+
+  // timer
+  let timerInterval = null;
+  let startTime = 0;
+
+  function formatTime(ms) {
+    const s = Math.floor(ms/1000);
+    const mm = Math.floor(s/60).toString().padStart(2,'0');
+    const ss = (s%60).toString().padStart(2,'0');
+    return `${mm}:${ss}`;
+  }
+
+  function startTimer() {
+    startTime = Date.now();
+    const el = document.getElementById('time-count');
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      const now = Date.now();
+      if (el) el.textContent = formatTime(now - startTime);
+    }, 250);
+  }
+
+  function stopTimer() {
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+  }
+
+  function resetTimer() {
+    stopTimer();
+    const el = document.getElementById('time-count');
+    if (el) el.textContent = '00:00';
+  }
+
+  function setStatus(text, color = '#7ee787') {
+    statusLabel.textContent = text;
+    statusLabel.style.color = color;
+  }
+
+  function rotateFace(face, dir = 1, options = { user: false }) {
+    if (isRotating) return Promise.resolve();
     isRotating = true;
+    return new Promise(resolve => {
     // axis and coordinate
     const map = { U: ['y', 1], D: ['y', -1], F: ['z', 1], B: ['z', -1], R: ['x', 1], L: ['x', -1] };
     const [axis, coord] = map[face];
@@ -168,10 +238,9 @@ export function initRubiksApp(container) {
     });
 
     // animate rotation
-    const prop = { t: 0 };
     const sign = dir; // 1 => +90, -1 => -90
     const target = Math.PI / 2 * sign;
-    gsap.to(group.rotation, { [axis]: group.rotation[axis] + target, duration: 0.4, ease: 'power2.inOut', onComplete: () => {
+    gsap.to(group.rotation, { [axis]: group.rotation[axis] + target, duration: 0.35, ease: 'power2.inOut', onComplete: () => {
       // after rotation, reparent cubies back to parent and snap positions
       moving.forEach(c => {
         parent.attach(c.mesh);
@@ -179,19 +248,15 @@ export function initRubiksApp(container) {
         let [x,y,z] = c.pos;
         let nx = x, ny = y, nz = z;
         if (axis === 'x') {
-          // rotate around X: y,z -> [-z, y] for +90
           if (sign === 1) { ny = -z; nz = y; } else { ny = z; nz = -y; }
         } else if (axis === 'y') {
-          // rotate around Y: x,z -> [z, -x] for +90
           if (sign === 1) { nx = z; nz = -x; } else { nx = -z; nz = x; }
         } else if (axis === 'z') {
-          // rotate around Z: x,y -> [-y, x] for +90
           if (sign === 1) { nx = -y; ny = x; } else { nx = y; ny = -x; }
         }
         c.pos = [nx, ny, nz];
         // snap mesh position and rotation
         c.mesh.position.set(nx*(size+gap), ny*(size+gap), nz*(size+gap));
-        // normalize rotation to multiples of PI/2
         c.mesh.rotation.x = Math.round(c.mesh.rotation.x / (Math.PI/2)) * (Math.PI/2);
         c.mesh.rotation.y = Math.round(c.mesh.rotation.y / (Math.PI/2)) * (Math.PI/2);
         c.mesh.rotation.z = Math.round(c.mesh.rotation.z / (Math.PI/2)) * (Math.PI/2);
@@ -199,19 +264,48 @@ export function initRubiksApp(container) {
       // remove group
       parent.remove(group);
       isRotating = false;
+      // count move if this is a player move
+      if (options.user) {
+        moveCount += 1;
+        updateMoveUI();
+        if (isSolved()) {
+          setStatus('Gagné ! 🎉', '#7ee787');
+          gameStarted = false;
+          stopTimer();
+        }
+      }
+      resolve();
     } });
+    });
+  }
+
+  function isSolved() {
+    for (const c of cubies) {
+      const [x,y,z] = c.pos;
+      const [ix,iy,iz] = c.initialPos;
+      if (x !== ix || y !== iy || z !== iz) return false;
+      const rx = ((c.mesh.rotation.x % (Math.PI*2)) + (Math.PI*2)) % (Math.PI*2);
+      const ry = ((c.mesh.rotation.y % (Math.PI*2)) + (Math.PI*2)) % (Math.PI*2);
+      const rz = ((c.mesh.rotation.z % (Math.PI*2)) + (Math.PI*2)) % (Math.PI*2);
+      if (Math.abs(rx) > 1e-6 || Math.abs(ry) > 1e-6 || Math.abs(rz) > 1e-6) return false;
+    }
+    return true;
   }
 
   // simple scramble animation rotates the parent randomly (keeps cubie positions)
-  function scramble() {
-    const tl = gsap.timeline();
-    for (let i=0;i<12;i++) {
+  async function scramble(count = 12) {
+    setStatus('Mélange en cours...', '#ffd166');
+    gameStarted = false;
+    for (let i=0;i<count;i++) {
       const face = faces[Math.floor(Math.random()*faces.length)];
       const dir = Math.random()>.5?1:-1;
-      // call rotateFace sequentially using timeline
-      tl.call(() => rotateFace(face, dir));
-      tl.to({}, { duration: 0.05 });
+      // eslint-disable-next-line no-await-in-loop
+      await rotateFace(face, dir, { user: false });
+      // small pause
+      // eslint-disable-next-line no-await-in-loop
+      await new Promise(r => setTimeout(r, 60));
     }
+    setStatus('Prêt', '#7ee787');
   }
 
   function reset() {
@@ -226,10 +320,22 @@ export function initRubiksApp(container) {
       // reset materials so outward faces show correct colors
       setCubieMaterialsByPos(c.mesh, c.pos, colors);
     });
+    // reset game state
+    moveCount = 0; updateMoveUI();
+    gameStarted = false; setStatus('');
+    resetTimer();
   }
 
-  scrambleBtn.addEventListener('click', scramble);
   resetBtn.addEventListener('click', reset);
+  startBtn.addEventListener('click', async () => {
+    reset();
+    await scramble(20);
+    moveCount = 0; updateMoveUI();
+    gameStarted = true; setStatus('À vous de jouer', '#7ee787');
+    // start timer
+    resetTimer();
+    startTimer();
+  });
 
   // basic GUI
   const gui = new GUI({ width: 260 });
