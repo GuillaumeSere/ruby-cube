@@ -7,6 +7,9 @@ body { font-family: system-ui, Arial; background: #111; color: #eee; }
 .site-header .title { margin:0; font-size:20px; color:#fff; }
 .site-header .tagline { margin:0; font-size:13px; color:#cbd5e1; }
 .header-icon { border-radius:6px; box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
+
+.skip-link { position:absolute; left:-999px; top:auto; width:1px; height:1px; overflow:hidden; }
+.skip-link:focus { left:12px; top:12px; width:auto; height:auto; padding:8px 12px; background:#fff; color:#111; z-index:9999; border-radius:6px; }
 #main-content { display:flex; flex-direction:column; flex:1; }
 .controls { padding:10px; background: #0f0f0f; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
 .canvas-wrap { flex:1; position:relative; }
