@@ -2,6 +2,9 @@
 
 Une petite application web interactive affichant un Rubik's Cube 3D, construite avec Three.js et Vite.
 
+<img width="1918" height="923" alt="20250915144057" src="https://github.com/user-attachments/assets/50b060dd-5edf-4217-93fb-7b8f3a879633" />
+
+
 ## Description
 
 Cette démo propose:
