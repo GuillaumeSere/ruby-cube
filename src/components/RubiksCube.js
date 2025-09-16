@@ -81,10 +81,10 @@ export function initRubiksApp(container) {
   label.textContent = faceMap[f];
   const btnCW = document.createElement('button');
   btnCW.className = 'btn small';
-  btnCW.textContent = f + ' ↻';
+  btnCW.textContent = f + ' ↺ ';
   const btnCCW = document.createElement('button');
   btnCCW.className = 'btn small';
-  btnCCW.textContent = f + ' ↺';
+  btnCCW.textContent = f + ' ↻ ';
   const btnRow = document.createElement('div');
   btnRow.className = 'face-buttons';
   btnRow.appendChild(btnCW);
